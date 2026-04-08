@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Match</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:radial-gradient(ellipse at top,#0d2818,#061209);min-height:100vh;font-family:'Fredoka One',cursive;display:flex;flex-direction:column;align-items:center;padding-bottom:28px;}
+a.home{position:fixed;top:14px;left:14px;z-index:10;background:rgba(255,215,61,0.2);border:2px solid #ffd93d;border-radius:10px;padding:5px 13px;color:#ffd93d;font-family:'Fredoka One',cursive;font-size:.95rem;text-decoration:none;}
+h1{color:#ffd93d;font-size:clamp(1.8rem,4vw,3rem);padding:18px;text-shadow:0 3px 0 #b8860b;text-align:center;}
+#stats{display:flex;gap:24px;margin-bottom:14px;color:white;font-size:clamp(1rem,2vw,1.3rem);}
+#stats span{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:11px;padding:5px 16px;}
+.val{color:#ffd93d;}
+#diff{display:flex;gap:10px;margin-bottom:14px;}
+.db{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:50px;padding:6px 18px;color:white;font-family:'Fredoka One',cursive;font-size:clamp(.8rem,1.4vw,.95rem);cursor:pointer;transition:all .2s;}
+.db.on,.db:hover{background:rgba(255,215,61,0.3);border-color:#ffd93d;}
+#grid{display:grid;gap:10px;padding:0 14px;max-width:880px;width:100%;}
+.card{aspect-ratio:1;border-radius:16px;cursor:pointer;position:relative;transform-style:preserve-3d;transition:transform .4s;font-size:clamp(2rem,5vw,4rem);}
+.card.flip{transform:rotateY(180deg);}
+.card.match{transform:rotateY(180deg);animation:mp .4s ease;}
+@keyframes mp{0%{transform:rotateY(180deg) scale(1)}50%{transform:rotateY(180deg) scale(1.15)}to{transform:rotateY(180deg) scale(1)}}
+.cf,.cb{position:absolute;inset:0;border-radius:16px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;}
+.cf{background:linear-gradient(135deg,#2d5a27,#1a3a1a);border:3px solid rgba(255,255,255,0.15);font-size:1.8em;}
+.cb{background:linear-gradient(135deg,#fffde7,#fff9c4);border:3px solid #ffd93d;transform:rotateY(180deg);box-shadow:0 4px 12px rgba(0,0,0,.3);}
+.card.match .cb{background:linear-gradient(135deg,#c8e6c9,#a5d6a7);border-color:#34c759;}
+#win{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:100;}
+#win.show{display:flex;}
+#win h2{font-size:clamp(3rem,7vw,5rem);color:#ffd93d;text-shadow:0 4px 0 #b8860b;animation:bop .5s infinite alternate;}
+@keyframes bop{from{transform:scale(1)}to{transform:scale(1.06)}}
+#win p{color:white;font-size:clamp(1.2rem,3vw,2rem);}
+.pb{background:#ffd93d;border:none;border-radius:50px;padding:13px 38px;font-family:'Fredoka One',cursive;font-size:clamp(1.1rem,2.5vw,1.5rem);cursor:pointer;color:#1a2e1a;box-shadow:0 5px 0 #b8860b;}
+.conf{position:fixed;width:10px;height:10px;border-radius:3px;animation:fall 3s ease-in forwards;pointer-events:none;}
+@keyframes fall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<a href="../index.html" class="home">🏠 Home</a>
+<h1>🃏 Memory Match</h1>
+<div id="diff">
+  <button class="db on" onclick="start(8,this)">🌱 Easy</button>
+  <button class="db" onclick="start(12,this)">🌿 Medium</button>
+  <button class="db" onclick="start(16,this)">🌳 Hard</button>
+</div>
+<div id="stats"><span>Moves: <span class="val" id="mv">0</span></span><span>Pairs: <span class="val" id="pr">0</span>/<span class="val" id="tot">4</span></span></div>
+<div id="grid"></div>
+<div id="win">
+  <h2>🎉 You Win!</h2>
+  <p id="wm"></p>
+  <button class="pb" id="rp">Play Again 🔄</button>
+  <a href="../index.html" class="pb" style="text-decoration:none">🏠 Home</a>
+</div>
+<script>
+const AN=['🦁','🐘','🐒','🦒','🐸','🦜','🐅','🦛','🐊','🦓','🦏','🦧','🐍','🦋','🦀','🐬'];
+let fl=[],matched=0,moves=0,locked=false,curN=8;
+function start(n,btn){
+  curN=n;matched=0;moves=0;locked=false;fl=[];
+  document.querySelectorAll('.db').forEach(b=>b.classList.remove('on'));btn?.classList.add('on');
+  document.getElementById('mv').textContent=0;document.getElementById('pr').textContent=0;document.getElementById('tot').textContent=n/2;
+  document.getElementById('win').classList.remove('show');
+  const pairs=AN.slice(0,n/2);
+  const cards=[...pairs,...pairs].sort(()=>Math.random()-.5);
+  const g=document.getElementById('grid');
+  g.style.gridTemplateColumns=`repeat(4,1fr)`;g.innerHTML='';
+  cards.forEach((em,i)=>{
+    const c=document.createElement('div');c.className='card';c.dataset.em=em;
+    c.innerHTML=`<div class="cf">🌿</div><div class="cb">${em}</div>`;
+    c.onclick=()=>flip(c);g.appendChild(c);
+  });
+}
+function flip(card){
+  if(locked||card.classList.contains('flip')||card.classList.contains('match'))return;
+  card.classList.add('flip');fl.push(card);
+  if(fl.length===2){
+    locked=true;moves++;document.getElementById('mv').textContent=moves;
+    setTimeout(()=>{
+      if(fl[0].dataset.em===fl[1].dataset.em){
+        fl[0].classList.add('match');fl[1].classList.add('match');matched++;
+        document.getElementById('pr').textContent=matched;
+        if(matched===curN/2)setTimeout(win,350);
+      } else {fl[0].classList.remove('flip');fl[1].classList.remove('flip');}
+      fl=[];locked=false;
+    },750);
+  }
+}
+function win(){
+  document.getElementById('win').classList.add('show');
+  document.getElementById('wm').textContent=`${matched} pairs in ${moves} moves! 🌟`;
+  const C=['#ff3b30','#ff9500','#ffd93d','#34c759','#007aff','#af52de'];
+  for(let i=0;i<55;i++)setTimeout(()=>{const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${C[~~(Math.random()*C.length)]};animation-delay:${Math.random()*1.5}s;animation-duration:${2+Math.random()*1.5}s`;document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*40);
+}
+document.getElementById('rp').onclick=()=>start(curN,document.querySelector('.db.on'));
+start(8,document.querySelector('.db'));
+</script>
+</body>
+</html>

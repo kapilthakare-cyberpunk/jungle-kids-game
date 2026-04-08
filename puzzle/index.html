@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jungle Puzzle</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:radial-gradient(ellipse at top,#0d2818,#061209);min-height:100vh;font-family:"Fredoka One",cursive;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;padding-bottom:20px;}
+a.home{position:fixed;top:14px;left:14px;z-index:20;background:rgba(255,215,61,0.2);border:2px solid #ffd93d;border-radius:10px;padding:5px 13px;color:#ffd93d;font-family:"Fredoka One",cursive;font-size:.95rem;text-decoration:none;}
+h1{color:#ffd93d;font-size:clamp(1.8rem,4vw,3rem);padding:18px;text-shadow:0 3px 0 #b8860b;text-align:center;}
+#diff{display:flex;gap:10px;margin-bottom:10px;}
+.db{background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);border-radius:50px;padding:6px 18px;color:white;font-family:"Fredoka One",cursive;font-size:.9rem;cursor:pointer;transition:all .2s;}
+.db.on,.db:hover{background:rgba(255,215,61,.3);border-color:#ffd93d;}
+#prog{color:white;font-size:1.2rem;margin-bottom:10px;}#prog span{color:#ffd93d;}
+#layout{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;justify-content:center;padding:0 14px;max-width:1080px;width:100%;}
+#bwrap,#pwrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.lbl{color:rgba(255,255,255,.55);font-size:.95rem;}
+#board{position:relative;border:4px solid #ffd93d;border-radius:11px;background:#111;box-shadow:0 0 0 3px #b8860b,0 7px 25px rgba(0,0,0,.6);}
+.slot{position:absolute;border:2px dashed rgba(255,255,255,.14);border-radius:4px;transition:background .2s;}
+.slot.over{background:rgba(255,215,61,.15)!important;border-color:#ffd93d;}
+.slot.filled{border:2px solid rgba(255,255,255,.08);}
+#pieces{display:grid;gap:7px;}
+.piece{cursor:grab;border-radius:5px;border:3px solid rgba(255,255,255,.28);transition:transform .15s,box-shadow .15s;overflow:hidden;}
+.piece:hover{transform:scale(1.07);box-shadow:0 5px 18px rgba(0,0,0,.5);border-color:#ffd93d;}
+.piece.dragging{opacity:.45;cursor:grabbing;}.piece.placed{display:none;}
+#win{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:100;}
+#win.show{display:flex;}
+#win h2{font-size:clamp(3rem,7vw,5rem);color:#ffd93d;text-shadow:0 4px 0 #b8860b;animation:bop .5s infinite alternate;}
+@keyframes bop{from{transform:scale(1)}to{transform:scale(1.06)}}
+.pb{background:#ffd93d;border:none;border-radius:50px;padding:13px 38px;font-family:"Fredoka One",cursive;font-size:1.3rem;cursor:pointer;color:#1a2e1a;box-shadow:0 5px 0 #b8860b;}
+.conf{position:fixed;width:10px;height:10px;border-radius:3px;animation:fall 3s ease-in forwards;pointer-events:none;}
+@keyframes fall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+<a href="../index.html" class="home">&#x1F3E0; Home</a>
+<h1>&#x1F9E9; Jungle Puzzle</h1>
+<div id="diff">
+  <button class="db on" onclick="init(2,2,this)">&#x1F331; Easy (4)</button>
+  <button class="db" onclick="init(3,2,this)">&#x1F33F; Medium (6)</button>
+  <button class="db" onclick="init(3,3,this)">&#x1F333; Hard (9)</button>
+</div>
+<div id="prog">Placed: <span id="pl">0</span> / <span id="tot">4</span></div>
+<div id="layout">
+  <div id="bwrap"><div class="lbl">Put it together!</div><div id="board"></div></div>
+  <div id="pwrap"><div class="lbl">Drag pieces!</div><div id="pieces"></div></div>
+</div>
+<div id="win">
+  <h2>&#x1F389; Puzzle Done!</h2>
+  <button class="pb" id="rp">Play Again!</button>
+  <a href="../index.html" class="pb" style="text-decoration:none">&#x1F3E0; Home</a>
+</div>
+<script>
+let COLS=2,ROWS=2,PW,PH,BW,BH,placed=0;
+const SC=[{e:"\u2600\uFE0F",x:.8,y:.08,s:.12},{e:"\u26C5",x:.18,y:.1,s:.1},{e:"\uD83C\uDF34",x:.1,y:.3,s:.2},{e:"\uD83C\uDF34",x:.85,y:.25,s:.18},{e:"\uD83E\uDD81",x:.38,y:.48,s:.22},{e:"\uD83D\uDC18",x:.64,y:.52,s:.19},{e:"\uD83D\uDC12",x:.15,y:.42,s:.12},{e:"\uD83C\uDF3F",x:0,y:.62,s:.15},{e:"\uD83C\uDF3A",x:.28,y:.76,s:.08},{e:"\uD83C\uDF0A",x:0,y:.87,s:.55},{e:"\uD83C\uDF0A",x:.5,y:.92,s:.55}];
+function ds(canvas,w,h){const ctx=canvas.getContext("2d");const sky=ctx.createLinearGradient(0,0,0,h*.65);sky.addColorStop(0,"#87ceeb");sky.addColorStop(1,"#c8e6c9");ctx.fillStyle=sky;ctx.fillRect(0,0,w,h*.72);const gnd=ctx.createLinearGradient(0,h*.7,0,h);gnd.addColorStop(0,"#4caf50");gnd.addColorStop(1,"#2e7d32");ctx.fillStyle=gnd;ctx.fillRect(0,h*.7,w,h*.3);SC.forEach(it=>{ctx.font=it.s*w+"px serif";ctx.textBaseline="middle";ctx.textAlign="center";ctx.fillText(it.e,it.x*w,it.y*h);});}
+function init(cols,rows,btn){COLS=cols;ROWS=rows;placed=0;document.querySelectorAll(".db").forEach(b=>b.classList.remove("on"));btn&&btn.classList.add("on");document.getElementById("pl").textContent=0;document.getElementById("tot").textContent=cols*rows;document.getElementById("win").classList.remove("show");const vw=Math.min(window.innerWidth*.44,440);BW=Math.floor(vw/8)*8;BH=Math.floor(BW*.66/8)*8;PW=BW/COLS;PH=BH/ROWS;const src=document.createElement("canvas");src.width=BW;src.height=BH;ds(src,BW,BH);const board=document.getElementById("board");board.style.width=BW+"px";board.style.height=BH+"px";board.innerHTML="";for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const s=document.createElement("div");s.className="slot";s.style.cssText="left:"+c*PW+"px;top:"+r*PH+"px;width:"+PW+"px;height:"+PH+"px";s.dataset.r=r;s.dataset.c=c;s.addEventListener("dragover",e=>{e.preventDefault();s.classList.add("over");});s.addEventListener("dragleave",()=>s.classList.remove("over"));s.addEventListener("drop",e=>{e.preventDefault();s.classList.remove("over");drop(s);});board.appendChild(s);}const arr=[];for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const pc=document.createElement("canvas");pc.width=PW;pc.height=PH;pc.getContext("2d").drawImage(src,c*PW,r*PH,PW,PH,0,0,PW,PH);const p=document.createElement("div");p.className="piece";p.style.cssText="width:"+PW+"px;height:"+PH+"px";p.dataset.r=r;p.dataset.c=c;p.draggable=true;p.appendChild(pc);p.addEventListener("dragstart",e=>{p.classList.add("dragging");e.dataTransfer.setData("r",r);e.dataTransfer.setData("c",c);});p.addEventListener("dragend",()=>p.classList.remove("dragging"));arr.push(p);}arr.sort(()=>Math.random()-.5);const pg=document.getElementById("pieces");pg.style.gridTemplateColumns="repeat("+Math.min(cols,3)+","+PW+"px)";pg.innerHTML="";arr.forEach(p=>pg.appendChild(p));}
+function drop(slot){if(slot.classList.contains("filled"))return;const p=[...document.querySelectorAll(".piece")].find(x=>x.classList.contains("dragging"));if(!p)return;const r=parseInt(slot.dataset.r),c=parseInt(slot.dataset.c),pr=parseInt(p.dataset.r),pc2=parseInt(p.dataset.c);if(pr===r&&pc2===c){slot.classList.add("filled");const cv=document.createElement("canvas");cv.width=PW;cv.height=PH;cv.style.cssText="position:absolute;left:0;top:0;border-radius:4px;";cv.getContext("2d").drawImage(p.querySelector("canvas"),0,0);slot.appendChild(cv);p.classList.add("placed");placed++;document.getElementById("pl").textContent=placed;if(placed===COLS*ROWS)setTimeout(win,350);}}
+function win(){document.getElementById("win").classList.add("show");const C=["#ff3b30","#ff9500","#ffd93d","#34c759","#007aff","#af52de"];for(let i=0;i<55;i++)setTimeout(()=>{const c=document.createElement("div");c.className="conf";c.style.cssText="left:"+Math.random()*100+"vw;top:-20px;background:"+C[~~(Math.random()*C.length)]+";animation-delay:"+Math.random()*1.5+"s;animation-duration:"+(2+Math.random()*1.5)+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*40);}
+document.getElementById("rp").onclick=()=>init(COLS,ROWS,document.querySelector(".db.on"));
+init(2,2,document.querySelector(".db"));
+</script>
+</body>
+</html>

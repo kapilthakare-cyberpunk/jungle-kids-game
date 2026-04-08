@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 Kapil Jr's Jungle World</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@800;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: radial-gradient(ellipse at top, #0d2818 0%, #061209 100%);
+    min-height: 100vh; font-family: 'Fredoka One', cursive;
+    overflow-x: hidden;
+  }
+  h1 {
+    text-align:center; color: #ffd93d;
+    font-size: clamp(2rem,5vw,4rem);
+    padding: 30px 20px 10px;
+    text-shadow: 0 4px 0 #b8860b, 0 8px 20px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+  }
+  .subtitle { text-align:center; color:#6dbf5f; font-size:clamp(1rem,2vw,1.5rem); margin-bottom:40px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 24px 40px;
+  }
+  .card {
+    background: rgba(255,255,255,0.07);
+    border: 3px solid rgba(255,255,255,0.15);
+    border-radius: 24px; padding: 30px 20px;
+    text-align: center; cursor: pointer;
+    transition: all 0.25s; text-decoration:none; display:block;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content:''; position:absolute; inset:0; opacity:0;
+    transition: opacity 0.25s;
+    background: radial-gradient(circle at center, rgba(255,215,61,0.15), transparent 70%);
+  }
+  .card:hover { transform: translateY(-8px) scale(1.03); border-color: #ffd93d; box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(255,215,61,0.2); }
+  .card:hover::before { opacity:1; }
+  .card-emoji { font-size: clamp(3.5rem,8vw,5.5rem); display:block; margin-bottom:12px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+  .card-title { color:#ffd93d; font-size: clamp(1.3rem,2.5vw,1.8rem); margin-bottom:8px; }
+  .card-desc { color: rgba(255,255,255,0.7); font-family:'Nunito',sans-serif; font-weight:800; font-size:clamp(0.8rem,1.5vw,1rem); line-height:1.4; }
+  .badge { position:absolute; top:12px; right:12px; background:#ff3b30; color:white; border-radius:20px; padding:3px 10px; font-size:0.7rem; }
+  .badge.green { background: #34c759; }
+  .leaves { position:fixed; pointer-events:none; z-index:0; inset:0; overflow:hidden; }
+  .leaf { position:absolute; font-size:3rem; opacity:0.15; animation: leafsway 5s ease-in-out infinite alternate; }
+  @keyframes leafsway { from{transform:rotate(-10deg)} to{transform:rotate(10deg) translateY(-15px)} }
+</style>
+</head>
+<body>
+<div class="leaves">
+  <div class="leaf" style="top:5%;left:2%;animation-delay:0s">🌿</div>
+  <div class="leaf" style="top:20%;right:2%;animation-delay:1s">🍃</div>
+  <div class="leaf" style="top:50%;left:1%;animation-delay:2s">🌱</div>
+  <div class="leaf" style="top:70%;right:1%;animation-delay:0.5s">🌾</div>
+  <div class="leaf" style="top:85%;left:3%;animation-delay:1.5s">🍀</div>
+  <div class="leaf" style="top:40%;right:3%;animation-delay:2.5s">🌿</div>
+</div>
+
+<h1>🌿 Jungle World 🌿</h1>
+<p class="subtitle">Pick an adventure! 🐒</p>
+
+<div class="grid">
+  <a href="coloring/index.html" class="card">
+    <span class="card-emoji">🎨</span>
+    <div class="card-title">Jungle Coloring</div>
+    <div class="card-desc">Paint lions, elephants, monkeys & more jungle friends!</div>
+    <span class="badge green">READY</span>
+  </a>
+  <a href="alphabet/index.html" class="card">
+    <span class="card-emoji">🔤</span>
+    <div class="card-title">ABC Jungle</div>
+    <div class="card-desc">Learn letters A to Z with jungle animals & sounds!</div>
+    <span class="badge green">READY</span>
+  </a>
+  <a href="memory/index.html" class="card">
+    <span class="card-emoji">🃏</span>
+    <div class="card-title">Memory Match</div>
+    <div class="card-desc">Flip cards and find the matching jungle animal pairs!</div>
+    <span class="badge green">READY</span>
+  </a>
+  <a href="counting/index.html" class="card">
+    <span class="card-emoji">🔢</span>
+    <div class="card-title">Counting Fun</div>
+    <div class="card-desc">Count bananas, coconuts & jungle fruits — 1 to 10!</div>
+    <span class="badge green">READY</span>
+  </a>
+  <a href="sounds/index.html" class="card">
+    <span class="card-emoji">🔊</span>
+    <div class="card-title">Animal Sounds</div>
+    <div class="card-desc">Tap an animal and hear it ROAR, trumpet & chirp!</div>
+    <span class="badge green">READY</span>
+  </a>
+  <a href="puzzle/index.html" class="card">
+    <span class="card-emoji">🧩</span>
+    <div class="card-title">Jigsaw Puzzle</div>
+    <div class="card-desc">Drag pieces to build a jungle scene — easy mode!</div>
+    <span class="badge green">READY</span>
+  </a>
+</div>
+</body>
+</html>

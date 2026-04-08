@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Jungle</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:radial-gradient(ellipse at top,#0d2818,#061209);min-height:100vh;font-family:'Fredoka One',cursive;overflow-x:hidden;}
+a.home{position:fixed;top:14px;left:14px;z-index:10;background:rgba(255,215,61,0.2);border:2px solid #ffd93d;border-radius:10px;padding:5px 13px;color:#ffd93d;font-family:'Fredoka One',cursive;font-size:.95rem;text-decoration:none;}
+h1{text-align:center;color:#ffd93d;font-size:clamp(2rem,5vw,3.5rem);padding:22px 20px 6px;text-shadow:0 3px 0 #b8860b;}
+#disp{text-align:center;margin:0 auto 16px;max-width:500px;padding:0 20px;}
+#bl{font-size:clamp(6rem,18vw,13rem);color:#ffd93d;text-shadow:0 5px 0 #b8860b;line-height:1;animation:pop .4s ease;}
+@keyframes pop{from{transform:scale(.5);opacity:0}70%{transform:scale(1.1)}to{transform:scale(1);opacity:1}}
+#ae{font-size:clamp(4rem,11vw,8rem);animation:pop .4s ease .1s both;}
+#wd{font-size:clamp(1.4rem,3.5vw,2.5rem);color:white;margin-top:2px;}
+#wd span.hi{color:#6dbf5f;}
+#nav{display:flex;justify-content:center;gap:18px;margin-bottom:14px;}
+.nb{background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.25);border-radius:50px;padding:9px 26px;color:white;font-family:'Fredoka One',cursive;font-size:clamp(1rem,2vw,1.3rem);cursor:pointer;transition:all .2s;}
+.nb:hover{background:rgba(255,215,61,0.3);border-color:#ffd93d;}
+#lg{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;max-width:1050px;margin:0 auto;padding:0 14px 36px;}
+.lb{width:clamp(50px,6.5vw,72px);height:clamp(50px,6.5vw,72px);border-radius:13px;border:3px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.07);color:white;font-family:'Fredoka One',cursive;font-size:clamp(1.2rem,2.8vw,1.9rem);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.lb:hover,.lb.on{border-color:#ffd93d;background:rgba(255,215,61,0.22);transform:scale(1.12);}
+</style>
+</head>
+<body>
+<a href="../index.html" class="home">🏠 Home</a>
+<h1>🔤 ABC Jungle</h1>
+<div id="disp">
+  <div id="bl">A</div>
+  <div id="ae">🐊</div>
+  <div id="wd"><span class="hi" id="fl">A</span><span id="rw">lligator</span></div>
+</div>
+<div id="nav">
+  <button class="nb" onclick="go(-1)">⬅️ Back</button>
+  <button class="nb" onclick="go(1)">Next ➡️</button>
+</div>
+<div id="lg"></div>
+<script>
+const D=[{l:'A',e:'🐊',w:'Alligator'},{l:'B',e:'🐻',w:'Bear'},{l:'C',e:'🐈',w:'Cat'},{l:'D',e:'🦌',w:'Deer'},{l:'E',e:'🐘',w:'Elephant'},{l:'F',e:'🐸',w:'Frog'},{l:'G',e:'🦒',w:'Giraffe'},{l:'H',e:'🦛',w:'Hippo'},{l:'I',e:'🦎',w:'Iguana'},{l:'J',e:'🐆',w:'Jaguar'},{l:'K',e:'🦘',w:'Kangaroo'},{l:'L',e:'🦁',w:'Lion'},{l:'M',e:'🐒',w:'Monkey'},{l:'N',e:'🦏',w:'Rhino'},{l:'O',e:'🦧',w:'Orangutan'},{l:'P',e:'🦜',w:'Parrot'},{l:'Q',e:'🦅',w:'Quetzal'},{l:'R',e:'🦏',w:'Rhinoceros'},{l:'S',e:'🐍',w:'Snake'},{l:'T',e:'🐅',w:'Tiger'},{l:'U',e:'🦄',w:'Unicorn'},{l:'V',e:'🦅',w:'Vulture'},{l:'W',e:'🐺',w:'Wolf'},{l:'X',e:'🦊',w:'X-Fox'},{l:'Y',e:'🦬',w:'Yak'},{l:'Z',e:'🦓',w:'Zebra'}];
+let cur=0;
+function show(i){cur=i;const d=D[i];['bl','ae'].forEach(id=>{const el=document.getElementById(id);el.style.animation='none';el.offsetHeight;el.style.animation='';});document.getElementById('bl').textContent=d.l;document.getElementById('ae').textContent=d.e;document.getElementById('fl').textContent=d.l;document.getElementById('rw').textContent=d.w.slice(1);speak(d.l+' is for '+d.w);document.querySelectorAll('.lb').forEach((b,j)=>b.classList.toggle('on',j===i));}
+function go(dir){show((cur+26+dir)%26);}
+function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.8;u.pitch=1.2;speechSynthesis.speak(u);}
+const lg=document.getElementById('lg');
+D.forEach((d,i)=>{const b=document.createElement('button');b.className='lb'+(i===0?' on':'');b.textContent=d.l;b.onclick=()=>show(i);lg.appendChild(b);});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);});
+</script>
+</body>
+</html>

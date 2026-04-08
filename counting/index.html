@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Counting Fun</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:radial-gradient(ellipse at top,#0d2818,#061209);min-height:100vh;font-family:'Fredoka One',cursive;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+a.home{position:fixed;top:14px;left:14px;z-index:10;background:rgba(255,215,61,0.2);border:2px solid #ffd93d;border-radius:10px;padding:5px 13px;color:#ffd93d;font-family:'Fredoka One',cursive;font-size:.95rem;text-decoration:none;}
+h1{color:#ffd93d;font-size:clamp(1.8rem,4vw,3rem);padding:18px;text-shadow:0 3px 0 #b8860b;text-align:center;}
+#sb{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;justify-content:center;padding:0 18px;}
+.star{font-size:clamp(1.4rem,2.8vw,1.9rem);filter:grayscale(1);transition:filter .3s;}
+.star.lit{filter:none;}
+#nr{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;padding:0 18px;margin-bottom:8px;}
+.nd{width:clamp(34px,4.5vw,50px);height:clamp(34px,4.5vw,50px);border-radius:9px;border:2px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-size:clamp(.85rem,1.8vw,1.2rem);transition:all .3s;}
+.nd.done{background:rgba(52,199,89,.3);border-color:#34c759;color:#34c759;}
+.nd.cur{background:rgba(255,215,61,.3);border-color:#ffd93d;color:#ffd93d;}
+#q{text-align:center;color:white;font-size:clamp(1.2rem,3vw,2rem);margin-bottom:8px;}
+#ed{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;max-width:680px;padding:0 18px;margin:0 0 16px;min-height:110px;align-content:center;}
+.ei{font-size:clamp(2.2rem,5.5vw,4rem);animation:drop .3s ease both;filter:drop-shadow(0 2px 5px rgba(0,0,0,.4));}
+@keyframes drop{from{transform:translateY(-28px) scale(0);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+#fb{font-size:clamp(1.3rem,3.5vw,2.2rem);text-align:center;min-height:52px;margin-bottom:10px;}
+#ab{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:560px;width:100%;padding:0 18px;}
+.ans{background:rgba(255,255,255,.1);border:3px solid rgba(255,255,255,.2);border-radius:16px;padding:14px;color:white;font-family:'Fredoka One',cursive;font-size:clamp(1.4rem,3.5vw,2.3rem);cursor:pointer;transition:all .2s;aspect-ratio:1;display:flex;align-items:center;justify-content:center;}
+.ans:hover{transform:scale(1.1);border-color:#ffd93d;background:rgba(255,215,61,.2);}
+.ans.ok{background:rgba(52,199,89,.4)!important;border-color:#34c759!important;animation:cp .4s ease;}
+.ans.no{background:rgba(255,59,48,.4)!important;border-color:#ff3b30!important;animation:shake .4s ease;}
+@keyframes cp{0%{transform:scale(1)}50%{transform:scale(1.2)}to{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+</style>
+</head>
+<body>
+<a href="../index.html" class="home">🏠 Home</a>
+<h1>🔢 Counting Fun!</h1>
+<div id="sb"></div>
+<div id="nr"></div>
+<div id="q">How many are there?</div>
+<div id="ed"></div>
+<div id="fb"></div>
+<div id="ab"></div>
+<script>
+const ITEMS=[{e:'🍌',n:'bananas'},{e:'🥥',n:'coconuts'},{e:'🍍',n:'pineapples'},{e:'🦋',n:'butterflies'},{e:'🌺',n:'flowers'},{e:'⭐',n:'stars'},{e:'🍎',n:'apples'},{e:'🐝',n:'bees'},{e:'🍊',n:'oranges'},{e:'🌸',n:'flowers'}];
+let cur=0,score=0,seq=[];
+function buildSeq(){seq=Array.from({length:10},(_,i)=>i+1).sort(()=>Math.random()-.5);}
+function ui(){
+  const sb=document.getElementById('sb');sb.innerHTML='';
+  for(let i=0;i<10;i++){const s=document.createElement('div');s.className='star'+(i<score?' lit':'');s.textContent='⭐';sb.appendChild(s);}
+  const nr=document.getElementById('nr');nr.innerHTML='';
+  seq.forEach((n,i)=>{const d=document.createElement('div');d.className='nd'+(i<cur?' done':i===cur?' cur':'');d.textContent=n;nr.appendChild(d);});
+}
+function ask(){
+  const n=seq[cur];const item=ITEMS[~~(Math.random()*ITEMS.length)];
+  document.getElementById('q').textContent=`How many ${item.n}?`;
+  const ed=document.getElementById('ed');ed.innerHTML='';
+  for(let i=0;i<n;i++){const e=document.createElement('div');e.className='ei';e.textContent=item.e;e.style.animationDelay=(i*.07)+'s';ed.appendChild(e);}
+  speak(`How many ${item.n}?`);
+  const opts=new Set([n]);while(opts.size<4){opts.add(~~(Math.random()*10)+1);}
+  const arr=[...opts].sort(()=>Math.random()-.5);
+  const ab=document.getElementById('ab');ab.innerHTML='';
+  arr.forEach(num=>{const b=document.createElement('button');b.className='ans';b.textContent=num;b.onclick=()=>ans(b,num===n,n);ab.appendChild(b);});
+  document.getElementById('fb').textContent='';ui();
+}
+function ans(btn,ok,n){
+  document.querySelectorAll('.ans').forEach(b=>b.style.pointerEvents='none');
+  if(ok){btn.classList.add('ok');document.getElementById('fb').textContent='🎉 Yes! '+n+'!';score++;speak('Yes! '+n+'! Great job!');cur++;if(cur>=10){setTimeout(()=>{alert('🏆 You counted to 10! Amazing!');location.reload();},700);return;}setTimeout(ask,900);}
+  else{btn.classList.add('no');document.getElementById('fb').textContent='Try again! 👆';speak('Oops! Try again!');setTimeout(()=>{document.querySelectorAll('.ans').forEach(b=>{b.style.pointerEvents='';b.classList.remove('no');});},650);}
+}
+function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.85;u.pitch=1.2;speechSynthesis.speak(u);}
+buildSeq();ask();
+</script>
+</body>
+</html>
