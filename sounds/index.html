@@ -38,9 +38,22 @@ function play(a,card){
   document.getElementById('st').textContent=a.s;
   speak(a.say);setTimeout(()=>{card.classList.remove('pl');playing=null;},2000);
 }
-function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.8;u.pitch=1.3;speechSynthesis.speak(u);}
+function speak(t){
+  // Use Piper TTS if available, fallback to browser speech synthesis
+  if(window.piperTTS) {
+    window.piperTTS.speak(t);
+  } else {
+    if(!speechSynthesis)return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    u.rate=.8;
+    u.pitch=1.3;
+    speechSynthesis.speak(u);
+  }
+}
 const g=document.getElementById('g');
 A.forEach(a=>{const c=document.createElement('div');c.className='ac';c.innerHTML=`<span class="ce">${a.e}</span><div class="cn">${a.n}</div><div class="cs">${a.s.split(' ')[0]}</div>`;c.onclick=()=>play(a,c);g.appendChild(c);});
 </script>
+<script src="../tts-client.js"></script>
 </body>
 </html>

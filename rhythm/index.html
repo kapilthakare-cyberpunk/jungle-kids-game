@@ -170,7 +170,19 @@ function win() {
   for(let i=0;i<55;i++)setTimeout(()=>{const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${C[~~(Math.random()*C.length)]};animation-delay:${Math.random()*1.5}s;animation-duration:${2+Math.random()*1.5}s`;document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*40);
 }
 
-function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=1;u.pitch=0.5;speechSynthesis.speak(u);}
+function speak(t){
+  // Use Piper TTS if available, fallback to browser speech synthesis
+  if(window.piperTTS) {
+    window.piperTTS.speak(t);
+  } else {
+    if(!speechSynthesis)return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    u.rate=1;
+    u.pitch=0.5;
+    speechSynthesis.speak(u);
+  }
+}
 
 beatCircle.addEventListener('click', checkHit);
 startBtn.addEventListener('click', () => {
@@ -192,5 +204,6 @@ document.getElementById('rp').addEventListener('click', () => {
 
 updateUI();
 </script>
+<script src="../tts-client.js"></script>
 </body>
 </html>
