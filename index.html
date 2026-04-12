@@ -142,6 +142,69 @@
   </p>
 </div>
 
+<script>
+// TV Compatibility Script
+(function() {
+  // Detect TV browsers and add class
+  var ua = navigator.userAgent.toLowerCase();
+  var isTV = /tv|smarttv|googletv|appletv|roku|firetv|hbbtv|netcast|tizen|webos/i.test(ua) ||
+             window.innerWidth > window.innerHeight * 1.6 ||
+             window.innerHeight < 500;
+
+  if (isTV) {
+    document.body.classList.add('tv-mode');
+    console.log('TV mode detected - using simplified layout');
+  }
+
+  // Add keyboard navigation for TV remotes
+  var cards = document.querySelectorAll('.card');
+  var currentFocus = -1;
+
+  function focusCard(index) {
+    cards.forEach(function(card, i) {
+      if (i === index) {
+        card.classList.add('focused');
+        card.focus();
+      } else {
+        card.classList.remove('focused');
+      }
+    });
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (!isTV) return;
+
+    switch(e.key) {
+      case 'ArrowRight':
+        currentFocus = Math.min(currentFocus + 1, cards.length - 1);
+        focusCard(currentFocus);
+        e.preventDefault();
+        break;
+      case 'ArrowLeft':
+        currentFocus = Math.max(currentFocus - 1, 0);
+        focusCard(currentFocus);
+        e.preventDefault();
+        break;
+      case 'Enter':
+        if (currentFocus >= 0 && cards[currentFocus]) {
+          cards[currentFocus].click();
+        }
+        e.preventDefault();
+        break;
+    }
+  });
+
+  // Add basic focus styles for TV
+  var style = document.createElement('style');
+  style.textContent = `
+    .card.focused { border-color: #ffd93d !important; background: rgba(255,215,61,0.1) !important; }
+    .tv-mode .card { outline: none; }
+    .tv-mode .card:focus { border-color: #ffd93d; background: rgba(255,215,61,0.1); }
+  `;
+  document.head.appendChild(style);
+
+})();
+</script>
 <script src="tts-client.js"></script>
 </body>
 </html>
