@@ -72,11 +72,12 @@ function start(n,btn){
 function flip(card){
   if(locked||card.classList.contains('flip')||card.classList.contains('match'))return;
   card.classList.add('flip');fl.push(card);
-  // Use Piper TTS instead of browser speech synthesis
-  if(window.piperTTS) {
-    window.piperTTS.speak(card.dataset.em);
-  } else {
-    speak(card.dataset.em);
+  // Use Enhanced TTS if available
+  if(window.enhancedTTS) {
+    window.enhancedTTS.speak(card.dataset.em);
+  } else if(window.speechSynthesis) {
+    speechSynthesis.cancel();
+    speechSynthesis.speak(new SpeechSynthesisUtterance(card.dataset.em));
   }
   if(fl.length===2){
     locked=true;moves++;document.getElementById('mv').textContent=moves;
@@ -84,19 +85,19 @@ function flip(card){
       if(fl[0].dataset.em===fl[1].dataset.em){
         fl[0].classList.add('match');fl[1].classList.add('match');matched++;
         document.getElementById('pr').textContent=matched;
-        // Use Piper TTS for celebration
-        if(window.piperTTS) {
-          window.piperTTS.speak('Match found!');
-        } else {
-          speak('Match found!');
+        // Use Enhanced TTS for celebration
+        if(window.enhancedTTS) {
+          window.enhancedTTS.sayWellDone();
+        } else if(window.speechSynthesis) {
+          speechSynthesis.speak(new SpeechSynthesisUtterance('Match found!'));
         }
         if(matched===curN/2)setTimeout(win,350);
       } else {fl[0].classList.remove('flip');fl[1].classList.remove('flip');
-        // Use Piper TTS for encouragement
-        if(window.piperTTS) {
-          window.piperTTS.speak('Try again!');
-        } else {
-          speak('Try again!');
+        // Use Enhanced TTS for encouragement
+        if(window.enhancedTTS) {
+          window.enhancedTTS.sayTryAgain();
+        } else if(window.speechSynthesis) {
+          speechSynthesis.speak(new SpeechSynthesisUtterance('Try again!'));
         }
       }
       fl=[];locked=false;
@@ -112,5 +113,6 @@ function win(){
 document.getElementById('rp').onclick=()=>start(curN,document.querySelector('.db.on'));
 start(8,document.querySelector('.db'));
 </script>
+<script type="module" src="/tts-client.js"></script>
 </body>
 </html>

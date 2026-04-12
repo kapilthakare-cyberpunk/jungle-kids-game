@@ -45,7 +45,7 @@ h1{color:#ffd93d;font-size:clamp(1.8rem,4vw,3rem);padding:18px;text-shadow:0 3px
 <div id="ab"></div>
 <script>
 const ITEMS=[{e:'🍌',n:'bananas'},{e:'🥥',n:'coconuts'},{e:'🍍',n:'pineapples'},{e:'🦋',n:'butterflies'},{e:'🌺',n:'flowers'},{e:'⭐',n:'stars'},{e:'🍎',n:'apples'},{e:'🐝',n:'bees'},{e:'🍊',n:'oranges'},{e:'🌸',n:'flowers'}];
-let cur=0,score=0,seq=[];
+let cur=0,score=0,seq=[],curItem=null;
 function buildSeq(){seq=Array.from({length:10},(_,i)=>i+1).sort(()=>Math.random()-.5);}
 function ui(){
   const sb=document.getElementById('sb');sb.innerHTML='';
@@ -54,11 +54,15 @@ function ui(){
   seq.forEach((n,i)=>{const d=document.createElement('div');d.className='nd'+(i<cur?' done':i===cur?' cur':'');d.textContent=n;nr.appendChild(d);});
 }
 function ask(){
-  const n=seq[cur];const item=ITEMS[~~(Math.random()*ITEMS.length)];
-  document.getElementById('q').textContent=`How many ${item.n}?`;
+  const n=seq[cur];curItem=ITEMS[~~(Math.random()*ITEMS.length)];
+  document.getElementById('q').textContent=`How many ${curItem.n}?`;
   const ed=document.getElementById('ed');ed.innerHTML='';
-  for(let i=0;i<n;i++){const e=document.createElement('div');e.className='ei';e.textContent=item.e;e.style.animationDelay=(i*.07)+'s';e.onclick=()=>handleItemClick(e,i);ed.appendChild(e);}
-  speak(`How many ${item.n}?`);
+  for(let i=0;i<n;i++){const e=document.createElement('div');e.className='ei';e.textContent=curItem.e;e.style.animationDelay=(i*.07)+'s';e.onclick=()=>handleItemClick(e,i);ed.appendChild(e);}
+  if(window.enhancedTTS) {
+    window.enhancedTTS.speak(`How many ${curItem.n}?`);
+  } else {
+    speak(`How many ${curItem.n}?`);
+  }
   const opts=new Set([n]);while(opts.size<4){opts.add(~~(Math.random()*10)+1);}
   const arr=[...opts].sort(()=>Math.random()-.5);
   const ab=document.getElementById('ab');ab.innerHTML='';
@@ -69,18 +73,18 @@ function ans(btn,ok,n){
   document.querySelectorAll('.ans').forEach(b=>b.style.pointerEvents='none');
   if(ok){btn.classList.add('ok');document.getElementById('fb').textContent='🎉 Yes! '+n+'!';
     score++;
-    // Use Piper TTS for positive feedback
-    if(window.piperTTS) {
-      window.piperTTS.speak('Yes! '+n+'! Great job!');
+    // Use Enhanced TTS for positive feedback
+    if(window.enhancedTTS) {
+      window.enhancedTTS.sayCorrect();
     } else {
       speak('Yes! '+n+'! Great job!');
     }
     cur++;
     if(cur>=10){
       setTimeout(()=>{
-        // Use Piper TTS for celebration
-        if(window.piperTTS) {
-          window.piperTTS.speak('You counted to 10! Amazing!');
+        // Use Enhanced TTS for celebration
+        if(window.enhancedTTS) {
+          window.enhancedTTS.sayYouWin();
         } else {
           speak('You counted to 10! Amazing!');
         }
@@ -91,9 +95,9 @@ function ans(btn,ok,n){
     setTimeout(ask,900);
   }
   else{btn.classList.add('no');document.getElementById('fb').textContent='Try again! 👆';
-    // Use Piper TTS for gentle correction
-    if(window.piperTTS) {
-      window.piperTTS.speak('Oops! Try again!');
+    // Use Enhanced TTS for gentle correction
+    if(window.enhancedTTS) {
+      window.enhancedTTS.sayTryAgain();
     } else {
       speak('Oops! Try again!');
     }
@@ -101,8 +105,9 @@ function ans(btn,ok,n){
   }
 }
 function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.85;u.pitch=1.2;speechSynthesis.speak(u);}
-function handleItemClick(element,index){element.classList.add('correct');speak(item.e.replace(/[^\w\s]/g,''));setTimeout(()=>{element.classList.remove('correct');},500);}
+function handleItemClick(element,index){element.classList.add('correct');if(window.enhancedTTS){window.enhancedTTS.speak(curItem.n.replace(/[^\w\s]/g,''))}else{speak(curItem.n.replace(/[^\w\s]/g,''))}setTimeout(()=>{element.classList.remove('correct');},500);}
 buildSeq();ask();
 </script>
+<script type="module" src="/tts-client.js"></script>
 </body>
 </html>

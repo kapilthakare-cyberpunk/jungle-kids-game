@@ -268,12 +268,13 @@ function initEnhancedTTS() {
 
 // Auto-initialize when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPiperTTS);
+    document.addEventListener('DOMContentLoaded', initEnhancedTTS);
 } else {
-    initPiperTTS();
+    initEnhancedTTS();
 }
 
 // Export for module use
+export { EnhancedTTS };
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PiperTTS;
+    module.exports = EnhancedTTS;
 }

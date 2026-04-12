@@ -57,10 +57,30 @@ let COLS=2,ROWS=2,PW,PH,BW,BH,placed=0;
 const SC=[{e:"\u2600\uFE0F",x:.8,y:.08,s:.12},{e:"\u26C5",x:.18,y:.1,s:.1},{e:"\uD83C\uDF34",x:.1,y:.3,s:.2},{e:"\uD83C\uDF34",x:.85,y:.25,s:.18},{e:"\uD83E\uDD81",x:.38,y:.48,s:.22},{e:"\uD83D\uDC18",x:.64,y:.52,s:.19},{e:"\uD83D\uDC12",x:.15,y:.42,s:.12},{e:"\uD83C\uDF3F",x:0,y:.62,s:.15},{e:"\uD83C\uDF3A",x:.28,y:.76,s:.08},{e:"\uD83C\uDF0A",x:0,y:.87,s:.55},{e:"\uD83C\uDF0A",x:.5,y:.92,s:.55}];
 function ds(canvas,w,h){const ctx=canvas.getContext("2d");const sky=ctx.createLinearGradient(0,0,0,h*.65);sky.addColorStop(0,"#87ceeb");sky.addColorStop(1,"#c8e6c9");ctx.fillStyle=sky;ctx.fillRect(0,0,w,h*.72);const gnd=ctx.createLinearGradient(0,h*.7,0,h);gnd.addColorStop(0,"#4caf50");gnd.addColorStop(1,"#2e7d32");ctx.fillStyle=gnd;ctx.fillRect(0,h*.7,w,h*.3);SC.forEach(it=>{ctx.font=it.s*w+"px serif";ctx.textBaseline="middle";ctx.textAlign="center";ctx.fillText(it.e,it.x*w,it.y*h);});}
 function init(cols,rows,btn){COLS=cols;ROWS=rows;placed=0;document.querySelectorAll(".db").forEach(b=>b.classList.remove("on"));btn&&btn.classList.add("on");document.getElementById("pl").textContent=0;document.getElementById("tot").textContent=cols*rows;document.getElementById("win").classList.remove("show");const vw=Math.min(window.innerWidth*.44,440);BW=Math.floor(vw/8)*8;BH=Math.floor(BW*.66/8)*8;PW=BW/COLS;PH=BH/ROWS;const src=document.createElement("canvas");src.width=BW;src.height=BH;ds(src,BW,BH);const board=document.getElementById("board");board.style.width=BW+"px";board.style.height=BH+"px";board.innerHTML="";for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const s=document.createElement("div");s.className="slot";s.style.cssText="left:"+c*PW+"px;top:"+r*PH+"px;width:"+PW+"px;height:"+PH+"px";s.dataset.r=r;s.dataset.c=c;s.addEventListener("dragover",e=>{e.preventDefault();s.classList.add("over");});s.addEventListener("dragleave",()=>s.classList.remove("over"));s.addEventListener("drop",e=>{e.preventDefault();s.classList.remove("over");drop(s);});board.appendChild(s);}const arr=[];for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const pc=document.createElement("canvas");pc.width=PW;pc.height=PH;pc.getContext("2d").drawImage(src,c*PW,r*PH,PW,PH,0,0,PW,PH);const p=document.createElement("div");p.className="piece";p.style.cssText="width:"+PW+"px;height:"+PH+"px";p.dataset.r=r;p.dataset.c=c;p.draggable=true;p.appendChild(pc);p.addEventListener("dragstart",e=>{p.classList.add("dragging");e.dataTransfer.setData("r",r);e.dataTransfer.setData("c",c);});p.addEventListener("dragend",()=>p.classList.remove("dragging"));arr.push(p);}arr.sort(()=>Math.random()-.5);const pg=document.getElementById("pieces");pg.style.gridTemplateColumns="repeat("+Math.min(cols,3)+","+PW+"px)";pg.innerHTML="";arr.forEach(p=>pg.appendChild(p));}
-function drop(slot){if(slot.classList.contains("filled"))return;const p=[...document.querySelectorAll(".piece")].find(x=>x.classList.contains("dragging"));if(!p)return;const r=parseInt(slot.dataset.r),c=parseInt(slot.dataset.c),pr=parseInt(p.dataset.r),pc2=parseInt(p.dataset.c);if(pr===r&&pc2===c){slot.classList.add("filled");const cv=document.createElement("canvas");cv.width=PW;cv.height=PH;cv.style.cssText="position:absolute;left:0;top:0;border-radius:4px;";cv.getContext("2d").drawImage(p.querySelector("canvas"),0,0);slot.appendChild(cv);p.classList.add("placed");placed++;document.getElementById("pl").textContent=placed;if(placed===COLS*ROWS)setTimeout(win,350);}}
-function win(){document.getElementById("win").classList.add("show");const C=["#ff3b30","#ff9500","#ffd93d","#34c759","#007aff","#af52de"];for(let i=0;i<55;i++)setTimeout(()=>{const c=document.createElement("div");c.className="conf";c.style.cssText="left:"+Math.random()*100+"vw;top:-20px;background:"+C[~~(Math.random()*C.length)]+";animation-delay:"+Math.random()*1.5+"s;animation-duration:"+(2+Math.random()*1.5)+"s";document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*40);}
+function drop(slot){if(slot.classList.contains("filled"))return;const p=[...document.querySelectorAll(".piece")].find(x=>x.classList.contains("dragging"));if(!p)return;const r=parseInt(slot.dataset.r),c=parseInt(slot.dataset.c),pr=parseInt(p.dataset.r),pc2=parseInt(p.dataset.c);if(pr===r&&pc2===c){
+  slot.classList.add("filled");
+  const cv=document.createElement("canvas");
+  cv.width=PW;cv.height=PH;
+  cv.style.cssText="position:absolute;left:0;top:0;border-radius:4px;";
+  cv.getContext("2d").drawImage(p.querySelector("canvas"),0,0);
+  slot.appendChild(cv);
+  p.classList.add("placed");
+  placed++;
+  document.getElementById("pl").textContent=placed;
+  if(window.enhancedTTS) {
+    window.enhancedTTS.speak("Match found!");
+  }
+  if(placed===COLS*ROWS)setTimeout(win,350);
+}}
+function win(){
+  document.getElementById("win").classList.add("show");
+  if(window.enhancedTTS) {
+    window.enhancedTTS.sayYouWin();
+  }
+  const C=["#ff3b30","#ff9500","#ffd93d","#34c759","#007aff","#af52de"];for(let i=0;i<55;i++)setTimeout(()=>{const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${C[~~(Math.random()*C.length)]};animation-delay:${Math.random()*1.5}s;animation-duration:${2+Math.random()*1.5}s`;document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*40);}
 document.getElementById("rp").onclick=()=>init(COLS,ROWS,document.querySelector(".db.on"));
 init(2,2,document.querySelector(".db"));
 </script>
+<script type="module" src="/tts-client.js"></script>
 </body>
 </html>

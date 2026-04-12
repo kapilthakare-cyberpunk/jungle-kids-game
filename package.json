@@ -1,0 +1,27 @@
+{
+  "name": "jungle-kids-game",
+  "version": "1.0.0",
+  "description": "Web-based educational game collection for children featuring 8 interactive games with memory puzzles, counting, coloring, shape matching, rhythm training, and more. Includes neural text-to-speech for enhanced accessibility and engagement in early childhood learning.",
+  "main": "tts-client.js",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"python3 enhanced-tts-server.py\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kapilthakare-cyberpunk/jungle-kids-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kapilthakare-cyberpunk/jungle-kids-game/issues"
+  },
+  "homepage": "https://github.com/kapilthakare-cyberpunk/jungle-kids-game#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "vite": "^8.0.8"
+  }
+}

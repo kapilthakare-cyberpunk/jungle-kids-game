@@ -39,9 +39,9 @@ function play(a,card){
   speak(a.say);setTimeout(()=>{card.classList.remove('pl');playing=null;},2000);
 }
 function speak(t){
-  // Use Piper TTS if available, fallback to browser speech synthesis
-  if(window.piperTTS) {
-    window.piperTTS.speak(t);
+  // Use Enhanced TTS if available, fallback to browser speech synthesis
+  if(window.enhancedTTS) {
+    window.enhancedTTS.speak(t);
   } else {
     if(!speechSynthesis)return;
     speechSynthesis.cancel();
@@ -54,6 +54,6 @@ function speak(t){
 const g=document.getElementById('g');
 A.forEach(a=>{const c=document.createElement('div');c.className='ac';c.innerHTML=`<span class="ce">${a.e}</span><div class="cn">${a.n}</div><div class="cs">${a.s.split(' ')[0]}</div>`;c.onclick=()=>play(a,c);g.appendChild(c);});
 </script>
-<script src="../tts-client.js"></script>
+<script type="module" src="/tts-client.js"></script>
 </body>
 </html>
