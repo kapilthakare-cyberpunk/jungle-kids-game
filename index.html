@@ -200,8 +200,27 @@
     .card.focused { border-color: #ffd93d !important; background: rgba(255,215,61,0.1) !important; }
     .tv-mode .card { outline: none; }
     .tv-mode .card:focus { border-color: #ffd93d; background: rgba(255,215,61,0.1); }
+    .tv-instructions {
+      position: fixed; bottom: 20px; left: 20px; right: 20px;
+      background: rgba(0,0,0,0.8); color: white; padding: 15px;
+      border-radius: 10px; font-size: 0.9rem; text-align: center;
+      font-family: 'Nunito', sans-serif;
+    }
   `;
   document.head.appendChild(style);
+
+  // Add TV instructions if in TV mode
+  if (isTV) {
+    var instructions = document.createElement('div');
+    instructions.className = 'tv-instructions';
+    instructions.innerHTML = '📺 Use arrow keys on your remote to navigate • Press ENTER to select a game';
+    document.body.appendChild(instructions);
+
+    // Auto-hide instructions after 10 seconds
+    setTimeout(function() {
+      instructions.style.display = 'none';
+    }, 10000);
+  }
 
 })();
 </script>
