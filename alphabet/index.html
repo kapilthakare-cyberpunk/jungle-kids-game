@@ -42,7 +42,19 @@ const D=[{l:'A',e:'🐊',w:'Alligator'},{l:'B',e:'🐻',w:'Bear'},{l:'C',e:'🐈
 let cur=0;
 function show(i){cur=i;const d=D[i];['bl','ae'].forEach(id=>{const el=document.getElementById(id);el.style.animation='none';el.offsetHeight;el.style.animation='';});document.getElementById('bl').textContent=d.l;document.getElementById('ae').textContent=d.e;document.getElementById('fl').textContent=d.l;document.getElementById('rw').textContent=d.w.slice(1);speak(d.l+' is for '+d.w);document.querySelectorAll('.lb').forEach((b,j)=>b.classList.toggle('on',j===i));}
 function go(dir){show((cur+26+dir)%26);}
-function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.8;u.pitch=1.2;speechSynthesis.speak(u);}
+function speak(t){
+  // Use Piper TTS if available, fallback to browser speech synthesis
+  if(window.piperTTS) {
+    window.piperTTS.speak(t);
+  } else {
+    if(!speechSynthesis)return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    u.rate=.8;
+    u.pitch=1.2;
+    speechSynthesis.speak(u);
+  }
+}
 const lg=document.getElementById('lg');
 D.forEach((d,i)=>{const b=document.createElement('button');b.className='lb'+(i===0?' on':'');b.textContent=d.l;b.onclick=()=>show(i);lg.appendChild(b);});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);});

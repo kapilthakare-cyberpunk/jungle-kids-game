@@ -67,8 +67,38 @@ function ask(){
 }
 function ans(btn,ok,n){
   document.querySelectorAll('.ans').forEach(b=>b.style.pointerEvents='none');
-  if(ok){btn.classList.add('ok');document.getElementById('fb').textContent='🎉 Yes! '+n+'!';score++;speak('Yes! '+n+'! Great job!');cur++;if(cur>=10){setTimeout(()=>{alert('🏆 You counted to 10! Amazing!');location.reload();},700);return;}setTimeout(ask,900);}
-  else{btn.classList.add('no');document.getElementById('fb').textContent='Try again! 👆';speak('Oops! Try again!');setTimeout(()=>{document.querySelectorAll('.ans').forEach(b=>{b.style.pointerEvents='';b.classList.remove('no');});},650);}
+  if(ok){btn.classList.add('ok');document.getElementById('fb').textContent='🎉 Yes! '+n+'!';
+    score++;
+    // Use Piper TTS for positive feedback
+    if(window.piperTTS) {
+      window.piperTTS.speak('Yes! '+n+'! Great job!');
+    } else {
+      speak('Yes! '+n+'! Great job!');
+    }
+    cur++;
+    if(cur>=10){
+      setTimeout(()=>{
+        // Use Piper TTS for celebration
+        if(window.piperTTS) {
+          window.piperTTS.speak('You counted to 10! Amazing!');
+        } else {
+          speak('You counted to 10! Amazing!');
+        }
+        setTimeout(()=>{location.reload();},1500);
+      },700);
+      return;
+    }
+    setTimeout(ask,900);
+  }
+  else{btn.classList.add('no');document.getElementById('fb').textContent='Try again! 👆';
+    // Use Piper TTS for gentle correction
+    if(window.piperTTS) {
+      window.piperTTS.speak('Oops! Try again!');
+    } else {
+      speak('Oops! Try again!');
+    }
+    setTimeout(()=>{document.querySelectorAll('.ans').forEach(b=>{b.style.pointerEvents='';b.classList.remove('no');});},650);
+  }
 }
 function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.85;u.pitch=1.2;speechSynthesis.speak(u);}
 function handleItemClick(element,index){element.classList.add('correct');speak(item.e.replace(/[^\w\s]/g,''));setTimeout(()=>{element.classList.remove('correct');},500);}

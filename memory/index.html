@@ -72,16 +72,33 @@ function start(n,btn){
 function flip(card){
   if(locked||card.classList.contains('flip')||card.classList.contains('match'))return;
   card.classList.add('flip');fl.push(card);
-  speak(card.dataset.em); // Speak the animal name
+  // Use Piper TTS instead of browser speech synthesis
+  if(window.piperTTS) {
+    window.piperTTS.speak(card.dataset.em);
+  } else {
+    speak(card.dataset.em);
+  }
   if(fl.length===2){
     locked=true;moves++;document.getElementById('mv').textContent=moves;
     setTimeout(()=>{
       if(fl[0].dataset.em===fl[1].dataset.em){
         fl[0].classList.add('match');fl[1].classList.add('match');matched++;
         document.getElementById('pr').textContent=matched;
-        speak('Match found!'); // Celebrate match
+        // Use Piper TTS for celebration
+        if(window.piperTTS) {
+          window.piperTTS.speak('Match found!');
+        } else {
+          speak('Match found!');
+        }
         if(matched===curN/2)setTimeout(win,350);
-      } else {fl[0].classList.remove('flip');fl[1].classList.remove('flip');speak('Try again!');}
+      } else {fl[0].classList.remove('flip');fl[1].classList.remove('flip');
+        // Use Piper TTS for encouragement
+        if(window.piperTTS) {
+          window.piperTTS.speak('Try again!');
+        } else {
+          speak('Try again!');
+        }
+      }
       fl=[];locked=false;
     },750);
   }
