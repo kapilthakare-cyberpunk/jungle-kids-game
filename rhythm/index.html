@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jungle Rhythm</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:radial-gradient(ellipse at top,#0d2818,#061209);min-height:100vh;font-family:'Fredoka One',cursive;display:flex;flex-direction:column;align-items:center;padding-bottom:28px;}
+a.home{position:fixed;top:14px;left:14px;z-index:10;background:rgba(255,215,61,0.2);border:2px solid #ffd93d;border-radius:10px;padding:5px 13px;color:#ffd93d;font-family:'Fredoka One',cursive;font-size:.95rem;text-decoration:none;}
+h1{color:#ffd93d;font-size:clamp(1.8rem,4vw,3rem);padding:18px;text-shadow:0 3px 0 #b8860b;text-align:center;}
+#stats{display:flex;gap:24px;margin-bottom:14px;color:white;font-size:clamp(1rem,2vw,1.3rem);}
+#stats span{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:11px;padding:5px 16px;}
+.val{color:#ffd93d;}
+#score{color:#ffd93d;}
+#rhythm-area{display:flex;flex-direction:column;align-items:center;gap:20px;margin-top:20px;}
+.beat-circle{width:clamp(80px,15vw,120px);height:clamp(80px,15vw,120px);border-radius:50%;background:linear-gradient(135deg,#2d5a27,#1a3a1a);border:4px solid rgba(255,255,255,0.15);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:clamp(2rem,5vw,3.5rem);transition:all 0.2s;user-select:none;}
+.beat-circle:hover{transform:scale(1.1);border-color:#ffd93d;}
+.beat-circle.active{background:linear-gradient(135deg,#ffd93d,#ffb347);border-color:#ffd93d;transform:scale(1.15);animation:pulse 0.3s ease;}
+.beat-circle.hit{background:linear-gradient(135deg,#34c759,#2e7d32);border-color:#34c759;}
+.beat-circle.miss{background:linear-gradient(135deg,#ff3b30,#d32f2f);border-color:#ff3b30;}
+.beat-circle.ready{background:linear-gradient(135deg,#007aff,#0056cc);border-color:#007aff;}
+@keyframes pulse{0%,100%{transform:scale(1.15)}50%{transform:scale(1.25)}}
+#sequence{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;justify-content:center;}
+.pattern-dot{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.3s;}
+.pattern-dot.active{background:#ffd93d;}
+#controls{display:flex;gap:15px;margin-bottom:20px;}
+.ctrl-btn{background:#ffd93d;border:none;border-radius:25px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:1rem;cursor:pointer;color:#1a2e1a;box-shadow:0 3px 0 #b8860b;}
+.ctrl-btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 #b8860b;}
+#win{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:100;}
+#win.show{display:flex;}
+#win h2{font-size:clamp(3rem,7vw,5rem);color:#ffd93d;text-shadow:0 4px 0 #b8860b;animation:bop .5s infinite alternate;}
+@keyframes bop{from{transform:scale(1)}to{transform:scale(1.06)}}
+#win p{color:white;font-size:clamp(1.2rem,3vw,2rem);}
+.pb{background:#ffd93d;border:none;border-radius:50px;padding:13px 38px;font-family:'Fredoka One',cursive;font-size:clamp(1.1rem,2.5vw,1.5rem);cursor:pointer;color:#1a2e1a;box-shadow:0 5px 0 #b8860b;}
+.conf{position:fixed;width:10px;height:10px;border-radius:3px;animation:fall 3s ease-in forwards;pointer-events:none;}
+@keyframes fall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.instructions{color:rgba(255,255,255,0.7);margin-top:10px;font-family:'Nunito',sans-serif;text-align:center;max-width:600px;}
+</style>
+</head>
+<body>
+<a href="../index.html" class="home">🏠 Home</a>
+<h1>🥁 Jungle Rhythm</h1>
+<div id="stats"><span>Score: <span class="val" id="score">0</span></span><span>Round: <span class="val" id="round">1</span></span></div>
+<p class="instructions">Follow the rhythm! Tap the drum when it lights up! 🥁</p>
+<div id="sequence"></div>
+<div id="rhythm-area">
+  <div id="beat-circle" class="beat-circle">🥁</div>
+</div>
+<div id="controls">
+  <button class="ctrl-btn" id="start-btn">Start Game</button>
+  <button class="ctrl-btn" id="listen-btn" style="display:none;">Listen Again</button>
+</div>
+
+<div id="win">
+  <h2>🎉 Rhythm Master!</h2>
+  <p id="wm"></p>
+  <button class="pb" id="rp">Play Again 🔄</button>
+  <a href="../index.html" class="pb" style="text-decoration:none">🏠 Home</a>
+</div>
+
+<script>
+let sequence = [];
+let playerSequence = [];
+let isPlaying = false;
+let isListening = false;
+let currentStep = 0;
+let score = 0;
+let round = 1;
+let gameStarted = false;
+
+const beatCircle = document.getElementById('beat-circle');
+const startBtn = document.getElementById('start-btn');
+const listenBtn = document.getElementById('listen-btn');
+
+function updateUI() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('round').textContent = round;
+}
+
+function createSequenceDisplay() {
+  const seqDiv = document.getElementById('sequence');
+  seqDiv.innerHTML = '';
+  for(let i = 0; i < sequence.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'pattern-dot';
+    dot.id = `dot-${i}`;
+    seqDiv.appendChild(dot);
+  }
+}
+
+function playSequence() {
+  isListening = true;
+  isPlaying = false;
+  currentStep = 0;
+  beatCircle.className = 'beat-circle';
+  
+  sequence.forEach((delay, index) => {
+    setTimeout(() => {
+      if(index < sequence.length) {
+        document.getElementById(`dot-${index}`).classList.add('active');
+        beatCircle.classList.add('active');
+        speak('BOOM!');
+        
+        setTimeout(() => {
+          beatCircle.classList.remove('active');
+          document.getElementById(`dot-${index}`).classList.remove('active');
+        }, 300);
+      }
+    }, index * 800);
+  });
+  
+  setTimeout(() => {
+    isListening = false;
+    isPlaying = true;
+    beatCircle.className = 'beat-circle ready';
+    currentStep = 0;
+    playerSequence = [];
+  }, sequence.length * 800 + 500);
+}
+
+function startRound() {
+  gameStarted = true;
+  sequence.push(Math.random());
+  createSequenceDisplay();
+  startBtn.style.display = 'none';
+  listenBtn.style.display = 'inline-block';
+  setTimeout(playSequence, 1000);
+}
+
+function checkHit() {
+  if(!isPlaying || !gameStarted) return;
+  
+  const expectedTime = currentStep * 800 + 500;
+  const currentTime = Date.now() - roundStartTime;
+  const diff = Math.abs(currentTime - expectedTime);
+  
+  if(diff < 200) { // Good timing
+    beatCircle.classList.add('hit');
+    score += 10;
+    setTimeout(() => beatCircle.classList.remove('hit'), 300);
+    playerSequence.push(true);
+    currentStep++;
+    
+    if(currentStep >= sequence.length) {
+      // Round complete
+      round++;
+      setTimeout(() => {
+        if(round <= 5) {
+          startRound();
+        } else {
+          win();
+        }
+      }, 1000);
+    }
+  } else {
+    beatCircle.classList.add('miss');
+    setTimeout(() => beatCircle.classList.remove('miss'), 300);
+    score = Math.max(0, score - 5);
+  }
+  
+  updateUI();
+}
+
+function win() {
+  document.getElementById('win').classList.add('show');
+  document.getElementById('wm').textContent = `Perfect rhythm! You scored ${score} points! 🥁`;
+  const C=['#ff3b30','#ff9500','#ffd93d','#34c759','#007aff','#af52de'];
+  for(let i=0;i<55;i++)setTimeout(()=>{const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${C[~~(Math.random()*C.length)]};animation-delay:${Math.random()*1.5}s;animation-duration:${2+Math.random()*1.5}s`;document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*40);
+}
+
+function speak(t){if(!speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=1;u.pitch=0.5;speechSynthesis.speak(u);}
+
+beatCircle.addEventListener('click', checkHit);
+startBtn.addEventListener('click', () => {
+  sequence = [];
+  score = 0;
+  round = 1;
+  updateUI();
+  roundStartTime = Date.now();
+  startRound();
+});
+
+listenBtn.addEventListener('click', () => {
+  playSequence();
+});
+
+document.getElementById('rp').addEventListener('click', () => {
+  location.reload();
+});
+
+updateUI();
+</script>
+</body>
+</html>

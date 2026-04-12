@@ -72,14 +72,16 @@ function start(n,btn){
 function flip(card){
   if(locked||card.classList.contains('flip')||card.classList.contains('match'))return;
   card.classList.add('flip');fl.push(card);
+  speak(card.dataset.em); // Speak the animal name
   if(fl.length===2){
     locked=true;moves++;document.getElementById('mv').textContent=moves;
     setTimeout(()=>{
       if(fl[0].dataset.em===fl[1].dataset.em){
         fl[0].classList.add('match');fl[1].classList.add('match');matched++;
         document.getElementById('pr').textContent=matched;
+        speak('Match found!'); // Celebrate match
         if(matched===curN/2)setTimeout(win,350);
-      } else {fl[0].classList.remove('flip');fl[1].classList.remove('flip');}
+      } else {fl[0].classList.remove('flip');fl[1].classList.remove('flip');speak('Try again!');}
       fl=[];locked=false;
     },750);
   }
