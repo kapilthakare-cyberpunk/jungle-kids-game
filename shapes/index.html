@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shape Matching</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:radial-gradient(ellipse at top,#0d2818,#061209);min-height:100vh;font-family:'Fredoka One',cursive;display:flex;flex-direction:column;align-items:center;padding-bottom:28px;}
+a.home{position:fixed;top:14px;left:14px;z-index:10;background:rgba(255,215,61,0.2);border:2px solid #ffd93d;border-radius:10px;padding:5px 13px;color:#ffd93d;font-family:'Fredoka One',cursive;font-size:.95rem;text-decoration:none;}
+h1{color:#ffd93d;font-size:clamp(1.8rem,4vw,3rem);padding:18px;text-shadow:0 3px 0 #b8860b;text-align:center;}
+#stats{display:flex;gap:24px;margin-bottom:14px;color:white;font-size:clamp(1rem,2vw,1.3rem);}
+#stats span{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:11px;padding:5px 16px;}
+.val{color:#ffd93d;}
+#score{color:#ffd93d;}
+#container{display:grid;grid-template-columns:1fr 1fr;gap:40px;width:100%;max-width:900px;padding:0 20px;margin-top:20px;}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.shape{width:100%;aspect-ratio:1;border-radius:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:clamp(3rem,7vw,5rem);transition:all 0.3s;background:linear-gradient(135deg,#2d5a27,#1a3a1a);border:3px solid rgba(255,255,255,0.15);}
+.shape:hover{transform:scale(1.08);border-color:#ffd93d;}
+.shape.selected{transform:scale(1.1);border-color:#34c759;background:linear-gradient(135deg,#1b5e20,#2e7d32);}
+.shape.matched{background:linear-gradient(135deg,#c8e6c9,#a5d6a7);border-color:#34c759;animation:pop 0.4s ease;}
+.shape.wrong{animation:shake 0.3s ease;}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+#win{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:100;}
+#win.show{display:flex;}
+#win h2{font-size:clamp(3rem,7vw,5rem);color:#ffd93d;text-shadow:0 4px 0 #b8860b;animation:bop .5s infinite alternate;}
+@keyframes bop{from{transform:scale(1)}to{transform:scale(1.06)}}
+#win p{color:white;font-size:clamp(1.2rem,3vw,2rem);}
+.pb{background:#ffd93d;border:none;border-radius:50px;padding:13px 38px;font-family:'Fredoka One',cursive;font-size:clamp(1.1rem,2.5vw,1.5rem);cursor:pointer;color:#1a2e1a;box-shadow:0 5px 0 #b8860b;}
+.conf{position:fixed;width:10px;height:10px;border-radius:3px;animation:fall 3s ease-in forwards;pointer-events:none;}
+@keyframes fall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.instructions{color:rgba(255,255,255,0.7);margin-top:10px;font-family:'Nunito',sans-serif;}
+</style>
+</head>
+<body>
+<a href="../index.html" class="home">🏠 Home</a>
+<h1>🔷 Shape Matching</h1>
+<div id="stats"><span>Score: <span class="val" id="score">0</span></span><span>Matched: <span class="val" id="matches">0</span>/6</span></div>
+<p class="instructions">Match the same shapes from both sides! ✨</p>
+<div id="container">
+  <div id="leftBoard" class="board"></div>
+  <div id="rightBoard" class="board"></div>
+</div>
+
+<div id="win">
+  <h2>🎉 You Win!</h2>
+  <p id="wm"></p>
+  <button class="pb" id="rp">Play Again 🔄</button>
+  <a href="../index.html" class="pb" style="text-decoration:none">🏠 Home</a>
+</div>
+
+<script>
+const SHAPES = ['🔴', '🟢', '🔵', '🟡', '🟣', '🟠'];
+let selected = null;
+let matchedCount = 0;
+let score = 0;
+
+function initGame(){
+  matchedCount = 0;
+  score = 0;
+  selected = null;
+  document.getElementById('score').textContent = '0';
+  document.getElementById('matches').textContent = '0';
+  document.getElementById('win').classList.remove('show');
+  
+  const leftShapes = [...SHAPES].sort(()=>Math.random()-.5);
+  const rightShapes = [...SHAPES].sort(()=>Math.random()-.5);
+  
+  const leftBoard = document.getElementById('leftBoard');
+  const rightBoard = document.getElementById('rightBoard');
+  leftBoard.innerHTML = '';
+  rightBoard.innerHTML = '';
+  
+  leftShapes.forEach((shape, i)=>{
+    const el = document.createElement('div');
+    el.className = 'shape left';
+    el.textContent = shape;
+    el.dataset.shape = shape;
+    el.onclick = () => selectShape(el);
+    leftBoard.appendChild(el);
+  });
+  
+  rightShapes.forEach((shape, i)=>{
+    const el = document.createElement('div');
+    el.className = 'shape right';
+    el.textContent = shape;
+    el.dataset.shape = shape;
+    el.onclick = () => selectShape(el);
+    rightBoard.appendChild(el);
+  });
+}
+
+function selectShape(el){
+  if(el.classList.contains('matched')) return;
+  
+  if(selected === null){
+    document.querySelectorAll('.shape.selected').forEach(s => s.classList.remove('selected'));
+    selected = el;
+    el.classList.add('selected');
+  } else {
+    if(selected === el) return;
+    
+    if((selected.classList.contains('left') && el.classList.contains('right')) || 
+       (selected.classList.contains('right') && el.classList.contains('left'))){
+      
+      if(selected.dataset.shape === el.dataset.shape){
+        selected.classList.add('matched');
+        el.classList.add('matched');
+        selected.classList.remove('selected');
+        matchedCount++;
+        score += 10;
+        document.getElementById('score').textContent = score;
+        document.getElementById('matches').textContent = matchedCount;
+        
+        if(matchedCount === 6) setTimeout(win, 400);
+      } else {
+        selected.classList.add('wrong');
+        el.classList.add('wrong');
+        setTimeout(()=>{
+          selected.classList.remove('wrong','selected');
+          el.classList.remove('wrong');
+        }, 300);
+      }
+      selected = null;
+    } else {
+      document.querySelectorAll('.shape.selected').forEach(s => s.classList.remove('selected'));
+      selected = el;
+      el.classList.add('selected');
+    }
+  }
+}
+
+function win(){
+  document.getElementById('win').classList.add('show');
+  document.getElementById('wm').textContent = `Perfect! You scored ${score} points! 🌟`;
+  const C=['#ff3b30','#ff9500','#ffd93d','#34c759','#007aff','#af52de'];
+  for(let i=0;i<55;i++)setTimeout(()=>{const c=document.createElement('div');c.className='conf';c.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${C[~~(Math.random()*C.length)]};animation-delay:${Math.random()*1.5}s;animation-duration:${2+Math.random()*1.5}s`;document.body.appendChild(c);setTimeout(()=>c.remove(),4000);},i*40);
+}
+
+document.getElementById('rp').onclick = initGame;
+initGame();
+</script>
+</body>
+</html>
