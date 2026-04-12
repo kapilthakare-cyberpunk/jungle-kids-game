@@ -8,57 +8,75 @@
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@800;900&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    background: radial-gradient(ellipse at top, #0d2818 0%, #061209 100%);
+    background: #0d2818; /* Solid color for TV compatibility */
     min-height: 100vh; font-family: 'Fredoka One', cursive;
-    overflow-x: hidden;
+    overflow-x: hidden; color: white;
   }
   h1 {
     text-align:center; color: #ffd93d;
-    font-size: clamp(2rem,5vw,4rem);
+    font-size: 3.5rem; /* Fixed size for TV */
     padding: 30px 20px 10px;
-    text-shadow: 0 4px 0 #b8860b, 0 8px 20px rgba(0,0,0,0.5);
+    text-shadow: 0 4px 0 #b8860b;
     letter-spacing: 2px;
   }
-  .subtitle { text-align:center; color:#6dbf5f; font-size:clamp(1rem,2vw,1.5rem); margin-bottom:40px; }
+  .subtitle { text-align:center; color:#6dbf5f; font-size:1.3rem; margin-bottom:40px; }
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px; max-width: 1200px; margin: 0 auto; padding: 0 24px 40px;
+    display: flex; /* Flexbox instead of Grid for TV compatibility */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 20px 40px;
   }
   .card {
-    background: rgba(255,255,255,0.07);
-    border: 3px solid rgba(255,255,255,0.15);
-    border-radius: 24px; padding: 30px 20px;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 20px; padding: 25px 15px;
     text-align: center; cursor: pointer;
-    transition: all 0.25s; text-decoration:none; display:block;
-    position: relative; overflow: hidden;
+    text-decoration:none; display:block;
+    position: relative; width: 280px; /* Fixed width for TV */
+    min-height: 200px;
+    transition: border-color 0.3s; /* Simple transition that works on TV */
   }
-  .card::before {
-    content:''; position:absolute; inset:0; opacity:0;
-    transition: opacity 0.25s;
-    background: radial-gradient(circle at center, rgba(255,215,61,0.15), transparent 70%);
+  .card:focus, .card:hover {
+    border-color: #ffd93d; /* Simple color change instead of transforms */
   }
-  .card:hover { transform: translateY(-8px) scale(1.03); border-color: #ffd93d; box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(255,215,61,0.2); }
-  .card:hover::before { opacity:1; }
-  .card-emoji { font-size: clamp(3.5rem,8vw,5.5rem); display:block; margin-bottom:12px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
-  .card-title { color:#ffd93d; font-size: clamp(1.3rem,2.5vw,1.8rem); margin-bottom:8px; }
-  .card-desc { color: rgba(255,255,255,0.7); font-family:'Nunito',sans-serif; font-weight:800; font-size:clamp(0.8rem,1.5vw,1rem); line-height:1.4; }
-  .badge { position:absolute; top:12px; right:12px; background:#ff3b30; color:white; border-radius:20px; padding:3px 10px; font-size:0.7rem; }
+  .card-emoji { font-size: 4rem; display:block; margin-bottom:12px; }
+  .card-title { color:#ffd93d; font-size: 1.5rem; margin-bottom:8px; }
+  .card-desc { color: rgba(255,255,255,0.8); font-family:'Nunito',sans-serif; font-weight:800; font-size:0.9rem; line-height:1.4; }
+  .badge { position:absolute; top:10px; right:10px; background:#ff3b30; color:white; border-radius:15px; padding:3px 8px; font-size:0.7rem; }
   .badge.green { background: #34c759; }
-  .leaves { position:fixed; pointer-events:none; z-index:0; inset:0; overflow:hidden; }
-  .leaf { position:absolute; font-size:3rem; opacity:0.15; animation: leafsway 5s ease-in-out infinite alternate; }
-  @keyframes leafsway { from{transform:rotate(-10deg)} to{transform:rotate(10deg) translateY(-15px)} }
+  /* Simplified background for TV compatibility */
+  .tv-bg {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #0d2818 0%, #061209 100%);
+    z-index: -1;
+  }
+
+  /* TV-specific media queries */
+  @media screen and (max-width: 1920px) and (max-height: 1080px) {
+    .card { width: 240px; padding: 20px 12px; }
+    .card-emoji { font-size: 3.5rem; }
+    .card-title { font-size: 1.3rem; }
+    h1 { font-size: 3rem; }
+  }
+
+  @media screen and (max-width: 1280px) {
+    .card { width: 200px; padding: 18px 10px; }
+    .card-emoji { font-size: 3rem; }
+    .card-title { font-size: 1.2rem; }
+    h1 { font-size: 2.5rem; }
+  }
+
+  /* For very small TV screens or mobile */
+  @media screen and (max-width: 800px) {
+    .grid { padding: 0 10px; gap: 15px; }
+    .card { width: 100%; max-width: 300px; }
+    h1 { font-size: 2rem; padding: 20px 10px; }
+    .subtitle { font-size: 1.1rem; margin-bottom: 30px; }
+  }
 </style>
 </head>
 <body>
-<div class="leaves">
-  <div class="leaf" style="top:5%;left:2%;animation-delay:0s">🌿</div>
-  <div class="leaf" style="top:20%;right:2%;animation-delay:1s">🍃</div>
-  <div class="leaf" style="top:50%;left:1%;animation-delay:2s">🌱</div>
-  <div class="leaf" style="top:70%;right:1%;animation-delay:0.5s">🌾</div>
-  <div class="leaf" style="top:85%;left:3%;animation-delay:1.5s">🍀</div>
-  <div class="leaf" style="top:40%;right:3%;animation-delay:2.5s">🌿</div>
-</div>
+<div class="tv-bg"></div>
 
 <h1>🌿 Jungle World 🌿</h1>
 <p class="subtitle">Pick an adventure! 🐒</p>
